@@ -1,42 +1,72 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <title>WebGIS Sederhana</title>
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WebGIS Example</title>
 
   <!-- Leaflet CSS -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"/>
+  
+  <!-- Leaflet Sidebar CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-sidebar@0.6.0/dist/leaflet-sidebar.min.css"/>
 
-  <!-- CSS kustom -->
-  <link rel="stylesheet" href="styles.css" />
+  <!-- Leaflet Fullscreen Plugin -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-fullscreen@2.0.0/leaflet.fullscreen.min.css"/>
+  
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <h1>WebGIS Saya</h1>
-  <input type="file" id="geojson-upload" accept=".geojson" />
+  <h1>Interactive WebGIS with Sidebar</h1>
+
   <div id="map"></div>
 
+  <!-- Sidebar HTML -->
+  <div id="sidebar" class="leaflet-sidebar collapsed">
+    <h3>Info Sidebar</h3>
+    <p>Sidebar content goes here. You can add layer control, info, etc.</p>
+  </div>
+
   <!-- Leaflet JS -->
-  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
 
-  <!-- JS untuk baca file GeoJSON -->
+  <!-- Leaflet Sidebar JS -->
+  <script src="https://unpkg.com/leaflet-sidebar@0.6.0/dist/leaflet-sidebar.min.js"></script>
+
+  <!-- Leaflet Fullscreen Plugin -->
+  <script src="https://unpkg.com/leaflet-fullscreen@2.0.0/leaflet.fullscreen.min.js"></script>
+
   <script>
-    const map = L.map('map').setView([-2.5489, 118.0149], 5); // Pusat Indonesia
+    const map = L.map('map').setView([40.7128, -74.0060], 13); // Example: Center on New York
 
+    // Tile Layer (OpenStreetMap)
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 18,
       attribution: '© OpenStreetMap'
     }).addTo(map);
 
-    document.getElementById('geojson-upload').addEventListener('change', function(evt) {
-      const file = evt.target.files[0];
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const geojsonData = JSON.parse(e.target.result);
-        L.geoJSON(geojsonData).addTo(map);
-      };
-      reader.readAsText(file);
-    });
+    // Sidebar
+    var sidebar = L.sidebar({ container: 'sidebar' }).addTo(map);
+
+    // Fullscreen Control
+    map.addControl(new L.Control.Fullscreen());
+
+    // Add a simple GeoJSON layer
+    fetch('https://raw.githubusercontent.com/RAFLIRAFIQRI/rumahku/main/wilayah.geojson')
+      .then(response => response.json())
+      .then(data => {
+        L.geoJSON(data, {
+          onEachFeature: function (feature, layer) {
+            layer.bindPopup(`<b>${feature.properties.name}</b><br>${feature.properties.description}`);
+          }
+        }).addTo(map);
+      });
+
+    // Sidebar Toggle Button
+    var button = L.easyButton('fa-bars', function() {
+      sidebar.toggle();
+    }).addTo(map);
   </script>
 </body>
 </html>
