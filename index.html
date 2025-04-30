@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>WebGIS Sederhana</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+  <!-- CSS kustom -->
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <h1>WebGIS Saya</h1>
+  <input type="file" id="geojson-upload" accept=".geojson" />
+  <div id="map"></div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+  <!-- JS untuk baca file GeoJSON -->
+  <script>
+    const map = L.map('map').setView([-2.5489, 118.0149], 5); // Pusat Indonesia
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 18,
+      attribution: '© OpenStreetMap'
+    }).addTo(map);
+
+    document.getElementById('geojson-upload').addEventListener('change', function(evt) {
+      const file = evt.target.files[0];
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const geojsonData = JSON.parse(e.target.result);
+        L.geoJSON(geojsonData).addTo(map);
+      };
+      reader.readAsText(file);
+    });
+  </script>
+</body>
+</html>
